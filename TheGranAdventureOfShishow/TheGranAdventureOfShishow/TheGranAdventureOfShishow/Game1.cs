@@ -11,80 +11,149 @@ using Microsoft.Xna.Framework.Media;
 
 namespace TheGranAdventureOfShishow
 {
-    /// <summary>
-    /// This is the main type for your game
-    /// </summary>ffff
+
     public class Game1 : Microsoft.Xna.Framework.Game
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Jugador jugador;
+        SpriteFont miFuente;
+        int width;
+        int height;
+        KeyboardState previoKeyboard;
+
+
+        #region Fondo
+        //Fondo__________________________________________________________________________________
+        Fondo fondo1, fondo2, fondo3, fondo4; Rectangle rFondo1, rFondo2, rFondo3, rFondo4;
+        //_______________________________________________________________________________________
+        #endregion Fondo
+
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            
+            height=480;
+            width = 800;
+             graphics.PreferredBackBufferHeight=height;
+             graphics.PreferredBackBufferWidth=width;
         }
 
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
+ 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+
+           jugador = new Jugador();
+            
 
             base.Initialize();
         }
 
-        /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
-        /// </summary>
+
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
+
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            #region Fondo
+            //Fondo_______________________________________________________________________________________________________________________
+            rFondo1 = new Rectangle(0, 0, 800, 480); fondo1 = new Fondo(this.Content.Load<Texture2D>("Fondo/MontanaNoche1"), rFondo1);
+            rFondo2 = new Rectangle(800, 0, 800, 480); fondo2 = new Fondo(this.Content.Load<Texture2D>("Fondo/MontanaNoche2"), rFondo2);
+            rFondo3 = new Rectangle(1600, 0, 800, 480); fondo3 = new Fondo(this.Content.Load<Texture2D>("Fondo/MontanaNoche3"), rFondo3);
+            rFondo4 = new Rectangle(800, 0, 800, 480); fondo4 = new Fondo(this.Content.Load<Texture2D>("Fondo/MontanaNoche4"), rFondo4);
+            //____________________________________________________________________________________________________________________________
+            #endregion Fondo
+
+            miFuente = Content.Load<SpriteFont>("Fuente/Fuente");
+
+            #region Jugador
+            jugador.Initialize(
+                Content.Load<Texture2D>("Personaje/CaminaIzquierda"),
+                Content.Load<Texture2D>("Personaje/CaminaDerecha"),
+                Content.Load<Texture2D>("Personaje/GolpeAbajoIzquierda"),
+                Content.Load<Texture2D>("Personaje/GolpeAbajoDerecha"),
+                Content.Load<SoundEffect>("Sonido/Golpe"),
+                8, 81, 117, 1,
+                5, 110, 121,120, 1, 
+                100, 400);
+            #endregion Personaje
+
+
+
+
+
+
         }
 
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// all content.
-        /// </summary>
+
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
+
         }
 
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+
         protected override void Update(GameTime gameTime)
         {
-            // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
+            #region Fondo
+            //Fondo_____________________________________________________________________
+            if (fondo1.cuadro.X + fondo1.cuadro.Width == 0) fondo1.cuadro.X = 800;
+            if (fondo2.cuadro.X + fondo2.cuadro.Width == 0) fondo2.cuadro.X = 800;
+            if (fondo3.cuadro.X + fondo3.cuadro.Width == 0) fondo3.cuadro.X = 800;
+            if (fondo4.cuadro.X + fondo4.cuadro.Width == 0) fondo4.cuadro.X = 800;
+            fondo1.Update(); fondo2.Update(); fondo3.Update(); fondo4.Update();
+            //__________________________________________________________________________
+            #endregion Fondo
 
-            // TODO: Add your update logic here
+            #region Jugador
+   
+            KeyboardState  keyboard=Keyboard.GetState();
+            if (keyboard.IsKeyDown(Keys.Left)) jugador.MoveLeft();
+            if (keyboard.IsKeyDown(Keys.Right)) jugador.MoveRight();
+            if (keyboard.IsKeyDown(Keys.Z) && !previoKeyboard.IsKeyDown(Keys.Z)) jugador.Hit();
+
+            jugador.Update(gameTime);
+            previoKeyboard = keyboard;
+
+            #endregion Jugador
+
+
+            Mundo(gameTime);
 
             base.Update(gameTime);
         }
 
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+
+        private void Mundo(GameTime gameTime)
+        {
+            if (jugador.x < 0) { jugador.x = 0; }
+            if (jugador.x > graphics.PreferredBackBufferWidth) { jugador.x = 800; }
+        }
+
+
+  
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+            spriteBatch.Begin();
+         
+            //TENER EN CUENTA EL ORDEN DE DIBUJAR, SE MUESTRA DEACUERDO A ESE ORDEN C: 
 
-            // TODO: Add your drawing code here
-
+            #region Fondo
+            //Fondo_________________________________________________________________________________________________
+            fondo1.Draw(spriteBatch); fondo2.Draw(spriteBatch); fondo3.Draw(spriteBatch); fondo4.Draw(spriteBatch);
+            //_______________________________________________________________________________________________________
+            #endregion Fondo
+            
+            spriteBatch.DrawString(miFuente, "Vida:         Monedas:          Tiempo:      ", new Vector2(0, 0), Color.Orange);
+          
+            jugador.Draw(spriteBatch);
+           
+            
+            spriteBatch.End();
+            
+            
             base.Draw(gameTime);
         }
     }
