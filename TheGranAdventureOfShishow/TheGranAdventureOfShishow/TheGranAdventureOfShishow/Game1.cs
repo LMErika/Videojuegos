@@ -18,6 +18,10 @@ namespace TheGranAdventureOfShishow
         SpriteBatch spriteBatch;
         Jugador jugador;
         SpriteFont miFuente;
+
+        int cuurentBackground;
+        List<Texture2D> backgrpunds;
+        List<Texture2D> segmentos;
         int width;
         int height;
         KeyboardState previoKeyboard;
@@ -35,7 +39,7 @@ namespace TheGranAdventureOfShishow
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             
-            height=480;
+            height=550;
             width = 800;
              graphics.PreferredBackBufferHeight=height;
              graphics.PreferredBackBufferWidth=width;
@@ -46,9 +50,14 @@ namespace TheGranAdventureOfShishow
         {
 
            jugador = new Jugador();
-            
 
-            base.Initialize();
+           #region Mundo
+           cuurentBackground = 0;
+           backgrpunds = new List<Texture2D>();
+           segmentos = new List<Texture2D>();
+           #endregion Mundo
+
+           base.Initialize();
         }
 
 
@@ -66,6 +75,15 @@ namespace TheGranAdventureOfShishow
             //____________________________________________________________________________________________________________________________
             #endregion Fondo
 
+            #region mundo
+            for(int i=1; i<=4; i++){
+                backgrpunds.Add(Content.Load<Texture2D>("Fondo000/Fondo"+i.ToString()));
+                //if(i==2) segmentos.Add(Content.Load<Texture2D>("Segmento/Objeto" + i.ToString()));
+           
+            }
+           #endregion mundo
+
+
             miFuente = Content.Load<SpriteFont>("Fuente/Fuente");
 
             #region Jugador
@@ -77,7 +95,10 @@ namespace TheGranAdventureOfShishow
                 Content.Load<SoundEffect>("Sonido/Golpe"),
                 8, 81, 117, 1,
                 5, 110, 121,120, 1, 
-                100, 400);
+                100, height-100,     15,
+                
+                Content.Load<Texture2D>("Poder/PoderDerecha"),
+                Content.Load<Texture2D>("Poder/PoderIzquierda"), Content.Load<SoundEffect>("Sonido/Poder"));
             #endregion Personaje
 
 
@@ -112,6 +133,8 @@ namespace TheGranAdventureOfShishow
             if (keyboard.IsKeyDown(Keys.Left)) jugador.MoveLeft();
             if (keyboard.IsKeyDown(Keys.Right)) jugador.MoveRight();
             if (keyboard.IsKeyDown(Keys.Z) && !previoKeyboard.IsKeyDown(Keys.Z)) jugador.Hit();
+            if (keyboard.IsKeyDown(Keys.X) && !previoKeyboard.IsKeyDown(Keys.X)) jugador.Poder();
+    
 
             jugador.Update(gameTime);
             previoKeyboard = keyboard;
@@ -121,14 +144,41 @@ namespace TheGranAdventureOfShishow
 
             Mundo(gameTime);
 
+
+            //checkWorld(gameTime);
+
             base.Update(gameTime);
         }
 
 
+
+
+
         private void Mundo(GameTime gameTime)
         {
-            if (jugador.x < 0) { jugador.x = 0; }
-            if (jugador.x > graphics.PreferredBackBufferWidth) { jugador.x = 800; }
+        //    if (jugador.x < 0) { jugador.x = 0; }
+        //    if (jugador.x > graphics.PreferredBackBufferWidth) { jugador.x = 800; }
+            if (cuurentBackground == 0 && jugador.X < 0)
+            {
+                jugador.X = 0;
+            }
+            if (cuurentBackground == 0 && jugador.X>width)
+            {
+                jugador.X = 0;
+                cuurentBackground++;
+            }
+            if (cuurentBackground == 1 && jugador.X < 0)
+            {
+                jugador.X = width;
+                cuurentBackground--;
+            }
+            if (cuurentBackground == 1 && jugador.X > width)
+            {
+                jugador.X = 800;
+            }
+
+
+        
         }
 
 
@@ -142,10 +192,13 @@ namespace TheGranAdventureOfShishow
 
             #region Fondo
             //Fondo_________________________________________________________________________________________________
-            fondo1.Draw(spriteBatch); fondo2.Draw(spriteBatch); fondo3.Draw(spriteBatch); fondo4.Draw(spriteBatch);
+            //fondo1.Draw(spriteBatch); fondo2.Draw(spriteBatch); fondo3.Draw(spriteBatch); fondo4.Draw(spriteBatch);
             //_______________________________________________________________________________________________________
             #endregion Fondo
-            
+
+            spriteBatch.Draw(backgrpunds[cuurentBackground],new Vector2(0,0), Color.White);
+            //spriteBatch.Draw(segmentos[cuurentBackground], new Vector2(0, 0), Color.White);
+
             spriteBatch.DrawString(miFuente, "Vida:         Monedas:          Tiempo:      ", new Vector2(0, 0), Color.Orange);
           
             jugador.Draw(spriteBatch);

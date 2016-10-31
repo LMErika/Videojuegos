@@ -15,36 +15,41 @@ namespace TheGranAdventureOfShishow
     public class Jugador
     {
 
-        private Texture2D WalkLeft;
-        private Texture2D WalkRight;
-        private Texture2D HitLeft;
-        private Texture2D HitRight;
+        private Texture2D WalkLeft;       private Texture2D WalkRight;
+        private Texture2D HitLeft;        private Texture2D HitRight;
         private SoundEffect HitSound;
         private int frameCountWalk;
-        private int frameWidthWalk;
-        private int frameHeightWalk;
+        private int frameWidthWalk;       private int frameHeightWalk;
         private float scaleWalk;
         private int frameCountAttack;
-        private int frameWidthAttack;
-        private int frameHeightAttack;
+        private int frameWidthAttack;        private int frameHeightAttack;
         private int frameTimeAttack;
         private float scaleAttack;
         private int currentFrameWalk;
         private int currentFrameAttack;
-        private Rectangle sourceRect = new Rectangle();
-        private Rectangle destinatioRect = new Rectangle();
-        public int x;
-        private int y;
+        private Rectangle sourceRect = new Rectangle();        private Rectangle destinatioRect = new Rectangle();
+        public int x;     private int y;
         private Direccion direction;
 
         private int speed;
         private bool hit;
+        //------------------------------------------------------------
+        private List<Poder> poderes;
+        private int nPoder;
+        private Texture2D PoderLeft; private Texture2D PoderRight;
+        private SoundEffect GolpeSound;
+
 
         private int elapsedTime;
 
+        public int X
+        {
+            get { return x; }
+            set { x = value; }
+        }
 
 
-
+        
         public void Initialize(Texture2D WalkLeft,
             Texture2D WalkRight, Texture2D HitLeft,
             Texture2D HitRight,SoundEffect HitSound,
@@ -53,8 +58,8 @@ namespace TheGranAdventureOfShishow
             int frameCountAttack, int frameWidthAttack,
             int frameHeightAttack,int frameTimeAttack,
             float scaleAttack,
-            int x, int y)
-
+            int x, int y, 
+            int nPoder,Texture2D PoderLeft,Texture2D PoderRight,SoundEffect GolpeSound)
         {
             this.WalkLeft = WalkLeft;
             this.WalkRight = WalkRight;
@@ -77,7 +82,12 @@ namespace TheGranAdventureOfShishow
             this.direction = Direccion.LeftRight;
             this.speed = 3;
             this.hit = false;
-         
+            //----------------------------------------------------------------------------------------
+            this.nPoder = nPoder;
+            this.PoderLeft = PoderLeft;
+            this.PoderRight = PoderRight;
+            this.poderes = new List<Poder>();
+            this.GolpeSound = GolpeSound;
 
         }
 
@@ -93,6 +103,7 @@ namespace TheGranAdventureOfShishow
                 y - (int)(frameHeightWalk * scaleWalk) / 2,
                 (int)(frameWidthWalk * scaleWalk),
                 (int)(frameHeightWalk * scaleWalk));
+
             }
 
             else
@@ -125,6 +136,15 @@ namespace TheGranAdventureOfShishow
                     (int)(frameWidthAttack * scaleAttack),
                     (int)(frameHeightAttack * scaleAttack));
             }
+
+            UpdatePoder(gameTime);
+        }
+            private void UpdatePoder(GameTime gameTime)
+            {
+                foreach (Poder  poder in poderes)
+	            {
+		            poder.Update(gameTime);
+	            }
         }
 
 
@@ -144,7 +164,9 @@ namespace TheGranAdventureOfShishow
                 }
             }
 
+
             else
+
             {
                 if (direction == Direccion.LeftRight)
                 {
@@ -156,8 +178,20 @@ namespace TheGranAdventureOfShishow
                     spriteBatch.Draw(HitLeft, destinatioRect, sourceRect, Color.White);
 
                 }
+
             }
-        } 
+            DrawPoder(spriteBatch);
+        }
+
+            public void DrawPoder(SpriteBatch spriteBacht)
+            {
+
+                foreach (Poder poder in poderes)
+                {
+                    poder.Draw(spriteBacht); 
+                }
+            }
+         
 
 
 
@@ -200,7 +234,18 @@ namespace TheGranAdventureOfShishow
             HitSound.Play();
             hit = true;
         }
-        
+
+        internal void Poder()
+        {
+            if (nPoder <= 0) return;
+            
+                Poder poder = new Poder();
+                poder.Initialaze(PoderLeft, PoderRight, direction, x, y);
+                GolpeSound.Play();
+                poderes.Add(poder);
+                nPoder--;
+            
+        }
 
 
     }
